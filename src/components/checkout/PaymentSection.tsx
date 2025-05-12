@@ -1,22 +1,20 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import PaymentMethods from "./PaymentMethods";
+import { usePayment } from "@/context/PaymentContext";
 
 interface PaymentSectionProps {
-  paymentMethod: string;
-  setPaymentMethod: (method: string) => void;
-  cryptoNetwork: string;
-  setCryptoNetwork: (network: string) => void;
   form: any;
 }
 
-const PaymentSection = ({
-  paymentMethod,
-  setPaymentMethod,
-  cryptoNetwork,
-  setCryptoNetwork,
-  form
-}: PaymentSectionProps) => {
+const PaymentSection = ({ form }: PaymentSectionProps) => {
+  const { 
+    paymentMethod, 
+    setPaymentMethod, 
+    cryptoNetwork, 
+    setCryptoNetwork 
+  } = usePayment();
+  
   return (
     <Card>
       <CardContent className="pt-6">

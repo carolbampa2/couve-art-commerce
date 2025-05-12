@@ -1,21 +1,17 @@
 
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ChevronRight } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
 import OrderSummary from '@/components/checkout/OrderSummary';
 import PaymentSection from '@/components/checkout/PaymentSection';
 import CheckoutSummary from '@/components/checkout/CheckoutSummary';
+import { PaymentProvider } from '@/context/PaymentContext';
 
 const Checkout = () => {
   const { productId } = useParams();
-  const navigate = useNavigate();
-  const [paymentMethod, setPaymentMethod] = useState("card");
-  const [cryptoNetwork, setCryptoNetwork] = useState("ethereum");
-  const [isProcessing, setIsProcessing] = useState(false);
   
   // Initialize react-hook-form
   const form = useForm({
@@ -50,69 +46,43 @@ const Checkout = () => {
     quantity: 1
   };
 
-  // Calculate summary
-  const subtotal = product.price * product.quantity;
-  const shipping = 5.99;
-  const total = subtotal + shipping;
-
-  const handlePayment = () => {
-    setIsProcessing(true);
-    
-    // Simulate payment processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      toast({
-        title: "Payment Successful",
-        description: `Your order has been processed via ${paymentMethod === 'card' ? 'credit card' : `${cryptoNetwork} network`}`,
-        variant: "default",
-      });
-      navigate("/payment-success");
-    }, 2000);
-  };
-
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-1 py-12">
-        <div className="container px-4 md:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left column - Order summary */}
-            <div className="lg:col-span-2">
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight mb-2">Checkout</h1>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <span>Cart</span>
-                  <ChevronRight className="h-4 w-4 mx-1" />
-                  <span>Information</span>
-                  <ChevronRight className="h-4 w-4 mx-1" />
-                  <span className="font-medium text-foreground">Payment</span>
+    <PaymentProvider>
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 py-12">
+          <div className="container px-4 md:px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left column - Order summary */}
+              <div className="lg:col-span-2">
+                <div className="mb-8">
+                  <h1 className="text-3xl font-bold tracking-tight mb-2">Checkout</h1>
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <span>Cart</span>
+                    <ChevronRight className="h-4 w-4 mx-1" />
+                    <span>Information</span>
+                    <ChevronRight className="h-4 w-4 mx-1" />
+                    <span className="font-medium text-foreground">Payment</span>
+                  </div>
                 </div>
-              </div>
 
-              <OrderSummary product={product} />
-              <PaymentSection 
-                paymentMethod={paymentMethod}
-                setPaymentMethod={setPaymentMethod}
-                cryptoNetwork={cryptoNetwork}
-                setCryptoNetwork={setCryptoNetwork}
-                form={form}
-              />
-            </div>
-            
-            {/* Right column - Payment and shipping info */}
-            <div>
-              <CheckoutSummary 
-                total={total}
-                isProcessing={isProcessing}
-                shippingForm={shippingForm}
-                handlePayment={handlePayment}
-              />
+                <OrderSummary product={product} />
+                <PaymentSection form={form} />
+              </div>
+              
+              {/* Right column - Payment and shipping info */}
+              <div>
+                <CheckoutSummary 
+                  total={product.price * product.quantity + 5.99}
+                  shippingForm={shippingForm}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </main>
-      <Footer />
-    </div>
+        </main>
+        <Footer />
+      </div>
+    </PaymentProvider>
   );
 };
 

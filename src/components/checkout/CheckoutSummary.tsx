@@ -3,20 +3,33 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import ShippingForm from "./ShippingForm";
+import { usePayment } from "@/context/PaymentContext";
 
 interface CheckoutSummaryProps {
   total: number;
-  isProcessing: boolean;
   shippingForm: any;
-  handlePayment: () => void;
 }
 
 const CheckoutSummary = ({ 
   total, 
-  isProcessing, 
-  shippingForm, 
-  handlePayment 
+  shippingForm
 }: CheckoutSummaryProps) => {
+  const { 
+    paymentMethod, 
+    isProcessing, 
+    processCardPayment,
+    processCryptoPayment 
+  } = usePayment();
+  
+  const handlePayment = () => {
+    if (paymentMethod === 'card') {
+      const cardData = shippingForm.getValues();
+      processCardPayment(cardData);
+    } else {
+      processCryptoPayment('wallet connected');
+    }
+  };
+  
   return (
     <Card className="sticky top-8">
       <CardContent className="pt-6">

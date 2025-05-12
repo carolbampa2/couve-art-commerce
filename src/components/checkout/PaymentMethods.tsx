@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { CreditCard, Bitcoin, Wallet } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
