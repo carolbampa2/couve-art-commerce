@@ -1,4 +1,5 @@
 
+
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -8,6 +9,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Lock, CheckCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useTheme } from "@/context/ThemeContext";
 
 interface Product {
   id: number;
@@ -23,6 +26,8 @@ const TokenConfirmation = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
+  const { theme } = useTheme();
+  const isDarkMode = theme === 'dark';
   
   // Mock product data - em uma app real, você buscaria isso de uma API
   const products: Product[] = [
@@ -87,8 +92,12 @@ const TokenConfirmation = () => {
               <div className="bg-card p-6 rounded-sm">
                 <div className="flex flex-col items-center text-center mb-6">
                   <Lock className="h-12 w-12 text-paisagem-purple mb-4" />
-                  <h1 className="text-3xl font-bold tracking-tight mb-2">Produto Exclusivo COUVE</h1>
-                  <p className="text-muted-foreground">
+                  <h1 className={cn("text-3xl font-bold tracking-tight mb-2", 
+                    isDarkMode ? "text-white" : "text-black")}>
+                    Produto Exclusivo COUVE
+                  </h1>
+                  <p className={cn("", 
+                    isDarkMode ? "text-muted-foreground" : "text-gray-600")}>
                     Este é um item exclusivo para detentores do token COUVE
                   </p>
                 </div>
@@ -103,12 +112,16 @@ const TokenConfirmation = () => {
                   </div>
                   
                   <div className="space-y-4">
-                    <h2 className="text-2xl font-bold">{product.title}</h2>
-                    <p className="text-muted-foreground">Por {product.artist}</p>
-                    <p className="text-lg font-semibold">${product.price}</p>
+                    <h2 className={cn("text-2xl font-bold", 
+                      isDarkMode ? "text-white" : "text-black")}>{product.title}</h2>
+                    <p className={cn("", 
+                      isDarkMode ? "text-muted-foreground" : "text-gray-600")}>Por {product.artist}</p>
+                    <p className={cn("text-lg font-semibold", 
+                      isDarkMode ? "text-white" : "text-black")}>${product.price}</p>
                     
                     <div className="bg-muted rounded-lg p-4">
-                      <p className="font-medium flex items-center gap-2">
+                      <p className={cn("font-medium flex items-center gap-2", 
+                        isDarkMode ? "text-white" : "text-gray-800")}>
                         <span className="text-paisagem-purple">{product.couveRequired}</span> 
                         tokens COUVE necessários
                       </p>
@@ -158,7 +171,8 @@ const TokenConfirmation = () => {
                       </DialogContent>
                     </Dialog>
                     
-                    <p className="text-sm text-muted-foreground">
+                    <p className={cn("text-sm", 
+                      isDarkMode ? "text-muted-foreground" : "text-gray-500")}>
                       Ao comprar este item, você confirma que possui tokens COUVE e permite
                       que nossa plataforma verifique seu saldo.
                     </p>
@@ -175,3 +189,4 @@ const TokenConfirmation = () => {
 };
 
 export default TokenConfirmation;
+
