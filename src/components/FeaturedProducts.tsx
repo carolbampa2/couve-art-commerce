@@ -1,4 +1,5 @@
 
+import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -87,8 +88,20 @@ const FeaturedProducts = () => {
                 
                 <div className="flex items-center justify-between mt-4">
                   <span className="font-semibold">${product.price}</span>
-                  <Button size="sm" className={product.exclusive ? "bg-paisagem-gray hover:bg-paisagem-gray/90" : "gradient-bg"}>
-                    {product.exclusive ? `${product.couveRequired}+ COUVE` : "Buy Now"}
+                  <Button 
+                    size="sm" 
+                    className={product.exclusive ? "bg-paisagem-gray hover:bg-paisagem-gray/90" : "gradient-bg"}
+                    asChild
+                  >
+                    {product.exclusive ? (
+                      <Link to={`/token-confirmation/${product.id}`}>
+                        {product.couveRequired}+ COUVE
+                      </Link>
+                    ) : (
+                      <Link to={`/checkout/${product.id}`}>
+                        Buy Now
+                      </Link>
+                    )}
                   </Button>
                 </div>
               </CardContent>
@@ -97,7 +110,9 @@ const FeaturedProducts = () => {
         </div>
         
         <div className="flex justify-center mt-10">
-          <Button variant="outline" size="lg">View All Products</Button>
+          <Button variant="outline" size="lg" asChild>
+            <Link to="/shop">View All Products</Link>
+          </Button>
         </div>
       </div>
     </section>
