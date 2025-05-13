@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/context/LanguageContext";
 
 const TokenSection = () => {
+  const { t } = useLanguage();
+  
   const benefits = [
     "Access to exclusive product releases",
     "Special edition artist collaborations",
@@ -57,30 +60,30 @@ const TokenSection = () => {
             <Card className="overflow-hidden border-2 border-paisagem-purple/20">
               <div className="p-1 gradient-bg">
                 <div className="bg-card p-4 rounded-sm">
-                  <h3 className="font-bold text-xl mb-4 text-center">COUVE Token Details</h3>
+                  <h3 className="font-bold text-xl mb-4 text-center text-black dark:text-white">COUVE Token Details</h3>
                   
                   <CardContent className="p-0 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-4 bg-muted rounded-md">
-                        <p className="text-muted-foreground text-sm mb-1">Network</p>
-                        <p className="font-bold">Solana</p>
+                        <p className="text-gray-500 dark:text-muted-foreground text-sm mb-1">Network</p>
+                        <p className="font-bold text-black dark:text-white">Solana</p>
                       </div>
                       <div className="text-center p-4 bg-muted rounded-md">
-                        <p className="text-muted-foreground text-sm mb-1">Token Type</p>
-                        <p className="font-bold">SPL</p>
+                        <p className="text-gray-500 dark:text-muted-foreground text-sm mb-1">Token Type</p>
+                        <p className="font-bold text-black dark:text-white">SPL</p>
                       </div>
                       <div className="text-center p-4 bg-muted rounded-md">
-                        <p className="text-muted-foreground text-sm mb-1">Min. Required</p>
-                        <p className="font-bold">100 COUVE</p>
+                        <p className="text-gray-500 dark:text-muted-foreground text-sm mb-1">Min. Required</p>
+                        <p className="font-bold text-black dark:text-white">100 COUVE</p>
                       </div>
                       <div className="text-center p-4 bg-muted rounded-md">
-                        <p className="text-muted-foreground text-sm mb-1">Total Supply</p>
-                        <p className="font-bold">10,000,000</p>
+                        <p className="text-gray-500 dark:text-muted-foreground text-sm mb-1">Total Supply</p>
+                        <p className="font-bold text-black dark:text-white">10,000,000</p>
                       </div>
                     </div>
                     
                     <div className="bg-muted p-4 rounded-md mt-4">
-                      <p className="text-center text-sm">
+                      <p className="text-center text-sm text-gray-600 dark:text-gray-300">
                         Token Address: <span className="font-mono text-xs">COUVE...</span>
                       </p>
                     </div>

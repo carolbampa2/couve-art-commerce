@@ -10,7 +10,7 @@ const translations = {
   
   // Hero
   "Where Art Meets Web3 Technology": "Where Art Meets Web3 Technology",
-  "Connecting graphic artists to a wider audience through blockchain innovation. Purchase exclusive designs and unlock special content with COUVE tokens.": "Connecting graphic artists to a wider audience through blockchain innovation. Purchase exclusive designs and unlock special content with COUVE tokens.",
+  "hero_description": "Connecting graphic artists to a wider audience through blockchain innovation. Purchase exclusive designs and unlock special content with COUVE tokens.",
   "Explore Shop": "Explore Shop",
   "Learn About COUVE": "Learn About COUVE",
   
@@ -39,7 +39,7 @@ const translations = {
   "Sign up as an Artist": "Sign up as an Artist",
   
   // Footer
-  "Connecting graphic artists to a wider audience through blockchain innovation. Purchase exclusive designs and unlock special content with COUVE tokens.": "Connecting graphic artists to a wider audience through blockchain innovation. Purchase exclusive designs and unlock special content with COUVE tokens.",
+  "footer_description": "Connecting graphic artists to a wider audience through blockchain innovation. Purchase exclusive designs and unlock special content with COUVE tokens.",
   "Navigation": "Navigation",
   "Subscribe": "Subscribe",
   "Stay updated with our newest artists, products, and token updates.": "Stay updated with our newest artists, products, and token updates.",
