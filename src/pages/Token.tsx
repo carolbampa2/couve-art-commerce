@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle, ArrowUpRight, Lock, Coins, Shield, Zap } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Token = () => {
   const benefits = [
@@ -59,7 +60,12 @@ const Token = () => {
                 </div>
               </div>
               
-              <div className="lg:ml-auto">
+              <div className="lg:ml-auto text-center">
+                <img 
+                  src="/lovable-uploads/adc930c8-6955-402c-bc37-11cc5b419149.png" 
+                  alt="COUVE Token"
+                  className="w-64 h-64 mx-auto mb-6"
+                />
                 <Card className="overflow-hidden border-2 border-paisagem-purple/20">
                   <div className="p-1 gradient-bg">
                     <div className="bg-card p-4 rounded-sm">
@@ -270,6 +276,13 @@ const Token = () => {
         {/* CTA Section */}
         <section className="py-16 bg-gradient-to-b from-muted/30 to-background">
           <div className="container px-4 md:px-6 text-center">
+            <div className="flex justify-center mb-6">
+              <img 
+                src="/lovable-uploads/adc930c8-6955-402c-bc37-11cc5b419149.png" 
+                alt="COUVE Token"
+                className="w-32 h-32"
+              />
+            </div>
             <h2 className="text-3xl font-bold tracking-tight mb-4">Ready to Join the Paisagem Community?</h2>
             <p className="text-muted-foreground max-w-[700px] mx-auto mb-8">
               Get COUVE tokens today and unlock exclusive access to limited edition designs from our talented artists.

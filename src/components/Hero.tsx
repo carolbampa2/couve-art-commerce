@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import Gallery from "@/components/Gallery";
 
 const Hero = () => {
   return (
@@ -34,13 +35,7 @@ const Hero = () => {
           </div>
           <div className="mx-auto lg:mx-0 relative">
             <div className="absolute inset-0 bg-gradient-to-r from-paisagem-purple/30 to-paisagem-teal/30 rounded-lg blur-3xl opacity-30"></div>
-            <div className="relative bg-gray-900 rounded-lg overflow-hidden shadow-xl animate-float">
-              <div className="aspect-[16/9] bg-gradient-to-br from-paisagem-darkPurple to-paisagem-teal p-2">
-                <div className="w-full h-full bg-background/5 rounded-md flex items-center justify-center">
-                  <p className="text-white text-xl md:text-2xl font-bold">Art Gallery Preview</p>
-                </div>
-              </div>
-            </div>
+            <Gallery />
           </div>
         </div>
       </div>

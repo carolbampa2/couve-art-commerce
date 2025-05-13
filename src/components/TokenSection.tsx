@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, ArrowUpRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const TokenSection = () => {
   const benefits = [
@@ -36,14 +37,23 @@ const TokenSection = () => {
             
             <div className="flex flex-col sm:flex-row gap-4">
               <Button className="gradient-bg" size="lg">
-                Get COUVE Tokens
-                <ArrowUpRight className="ml-2 h-4 w-4" />
+                <Link to="/token">
+                  Get COUVE Tokens
+                  <ArrowUpRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
-              <Button variant="outline" size="lg">Learn More</Button>
+              <Button variant="outline" size="lg">
+                <Link to="/token">Learn More</Link>
+              </Button>
             </div>
           </div>
           
-          <div className="lg:ml-auto">
+          <div className="lg:ml-auto relative">
+            <img 
+              src="/lovable-uploads/adc930c8-6955-402c-bc37-11cc5b419149.png" 
+              alt="COUVE Token"
+              className="w-48 h-48 mx-auto mb-4"
+            />
             <Card className="overflow-hidden border-2 border-paisagem-purple/20">
               <div className="p-1 gradient-bg">
                 <div className="bg-card p-4 rounded-sm">

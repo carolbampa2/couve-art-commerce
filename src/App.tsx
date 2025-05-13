@@ -12,6 +12,8 @@ import Token from "./pages/Token";
 import TokenConfirmation from "./pages/TokenConfirmation";
 import Checkout from "./pages/Checkout";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,8 +33,8 @@ const App = () => (
           <Route path="/token-confirmation/:productId" element={<TokenConfirmation />} />
           <Route path="/checkout/:productId" element={<Checkout />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
-          <Route path="/privacy" element={<Index />} /> {/* Placeholder for future Privacy page */}
-          <Route path="/terms" element={<Index />} /> {/* Placeholder for future Terms page */}
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
