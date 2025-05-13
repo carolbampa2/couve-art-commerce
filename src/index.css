@@ -107,7 +107,11 @@
 }
 
 .gradient-bg {
-  @apply bg-gradient-to-r from-paisagem-purple to-paisagem-teal;
+  @apply bg-gradient-to-r from-paisagem-purple to-paisagem-teal text-white;
+}
+
+.dark .gradient-bg {
+  @apply bg-gradient-to-r from-[#7c3aed] to-[#14b8a6] text-white;
 }
 
 .card-hover {
@@ -117,4 +121,8 @@
 .card-hover:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 25px rgba(91, 33, 182, 0.2);
+}
+
+.dark .card-hover:hover {
+  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
 }

@@ -1,12 +1,15 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Menu, X, Wallet } from "lucide-react";
+import { Menu, Wallet } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Link } from "react-router-dom";
+import LanguageThemeSelector from "@/components/LanguageThemeSelector";
+import { useLanguage } from "@/context/LanguageContext";
 
 const Navbar = () => {
   const [connected, setConnected] = useState(false);
+  const { t } = useLanguage();
 
   const handleConnect = () => {
     // This would be replaced with actual wallet connection logic
@@ -20,10 +23,10 @@ const Navbar = () => {
   };
 
   const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Artists", path: "/artists" },
-    { name: "Shop", path: "/shop" },
-    { name: "About COUVE", path: "/token" },
+    { name: t("Home"), path: "/" },
+    { name: t("Artists"), path: "/artists" },
+    { name: t("Shop"), path: "/shop" },
+    { name: t("About COUVE"), path: "/token" },
   ];
 
   return (
@@ -47,13 +50,16 @@ const Navbar = () => {
         </nav>
 
         <div className="flex items-center space-x-4">
+          {/* Language and Theme Selector */}
+          <LanguageThemeSelector />
+
           <Button 
             onClick={handleConnect} 
             variant={connected ? "outline" : "default"}
             className={`hidden md:flex items-center ${connected ? 'border-green-500 text-green-500' : 'gradient-bg'}`}
           >
             <Wallet className="mr-2 h-4 w-4" />
-            {connected ? 'Connected' : 'Connect Wallet'}
+            {connected ? t('Connected') : t('Connect Wallet')}
           </Button>
 
           {/* Mobile menu */}
@@ -85,8 +91,13 @@ const Navbar = () => {
                   className={`mt-4 ${connected ? 'border-green-500 text-green-500' : 'gradient-bg'}`}
                 >
                   <Wallet className="mr-2 h-4 w-4" />
-                  {connected ? 'Connected' : 'Connect Wallet'}
+                  {connected ? t('Connected') : t('Connect Wallet')}
                 </Button>
+                
+                {/* Language and Theme selector in mobile menu */}
+                <div className="mt-4 flex items-center justify-center">
+                  <LanguageThemeSelector />
+                </div>
               </div>
             </SheetContent>
           </Sheet>

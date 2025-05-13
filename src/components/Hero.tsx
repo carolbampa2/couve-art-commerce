@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import Gallery from "@/components/Gallery";
+import { useLanguage } from "@/context/LanguageContext";
 
 const Hero = () => {
+  const { t } = useLanguage();
+  
   return (
     <section className="py-16 md:py-24">
       <div className="container px-4 md:px-6">
@@ -12,23 +15,22 @@ const Hero = () => {
           <div className="flex flex-col justify-center space-y-4">
             <div className="space-y-2">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter">
-                Where Art Meets <span className="gradient-text">Web3</span> Technology
+                {t("Where Art Meets")} <span className="gradient-text">Web3</span> {t("Technology")}
               </h1>
               <p className="text-muted-foreground md:text-xl max-w-[600px]">
-                Connecting graphic artists to a wider audience through blockchain innovation.
-                Purchase exclusive designs and unlock special content with COUVE tokens.
+                {t("Connecting graphic artists to a wider audience through blockchain innovation. Purchase exclusive designs and unlock special content with COUVE tokens.")}
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
               <Button className="gradient-bg" size="lg">
                 <Link to="/shop" className="flex items-center">
-                  Explore Shop
+                  {t("Explore Shop")}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
               <Button variant="outline" size="lg">
                 <Link to="/token" className="flex items-center">
-                  Learn About COUVE
+                  {t("Learn About COUVE")}
                 </Link>
               </Button>
             </div>
