@@ -7,6 +7,7 @@ const translations = {
   "About COUVE": "About COUVE",
   "Connect Wallet": "Connect Wallet",
   "Connected": "Connected",
+  "Select Wallet": "Select Wallet",
   
   // Hero
   "Where Art Meets Web3 Technology": "Where Art Meets Web3 Technology",
@@ -32,6 +33,33 @@ const translations = {
   "Featured": "Featured",
   "Products": "Products",
   "View All Artists": "View All Artists",
+  "View Products": "View Products",
+  "Our Artists": "Our Artists",
+  "artists_description": "Discover talented creators bringing unique visions to life, supported by the Paisagem platform.",
+  "Search artists by name or style...": "Search artists by name or style...",
+  "All": "All",
+  "Digital": "Digital",
+  "Traditional": "Traditional",
+  "Mixed Media": "Mixed Media",
+  "Cultural": "Cultural",
+  "Urban": "Urban",
+  "Nature": "Nature",
+  "Cyberpunk": "Cyberpunk",
+  "Neon": "Neon",
+  "Contemporary": "Contemporary",
+  "Abstract": "Abstract",
+  "Illustration": "Illustration",
+  "Street Art": "Street Art",
+  "Want to join our artist community?": "Want to join our artist community?",
+  "artist_join_description": "We're always looking for talented artists to join our platform. If you're interested in showcasing your work and reaching a wider audience, get in touch with us.",
+  "Contact us to become a Paisagem artist": "Contact us to become a Paisagem artist",
+  
+  // Artist Products
+  "Products by": "Products by",
+  "View Details": "View Details",
+  "COUVE Exclusive": "COUVE Exclusive",
+  "No products found for this artist.": "No products found for this artist.",
+  "Artist not found": "Artist not found",
   
   // Artist Signup Section
   "Are you an artist?": "Are you an artist?",

@@ -2,6 +2,9 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Artist {
   id: number;
@@ -13,6 +16,8 @@ interface Artist {
 }
 
 const FeaturedArtists = () => {
+  const { t } = useLanguage();
+  
   const artists: Artist[] = [
     {
       id: 1,
@@ -44,9 +49,9 @@ const FeaturedArtists = () => {
     <section className="py-16">
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center justify-center text-center mb-10">
-          <h2 className="text-3xl font-bold tracking-tight mb-2">Meet Our Artists</h2>
+          <h2 className="text-3xl font-bold tracking-tight mb-2">{t("Meet Our Artists")}</h2>
           <p className="text-muted-foreground max-w-[700px]">
-            Talented creators bringing unique visions to life, supported by the Paisagem platform.
+            {t("Talented creators bringing unique visions to life, supported by the Paisagem platform.")}
           </p>
         </div>
         
@@ -65,12 +70,21 @@ const FeaturedArtists = () => {
                       <h3 className="font-semibold text-xl">{artist.name}</h3>
                       {artist.featured && (
                         <Badge variant="secondary" className="bg-paisagem-teal text-white">
-                          Featured
+                          {t("Featured")}
                         </Badge>
                       )}
                     </div>
                     <p className="text-muted-foreground text-sm">{artist.bio}</p>
-                    <p className="font-medium text-sm">{artist.products} Products</p>
+                    
+                    <Button 
+                      asChild
+                      variant="outline" 
+                      className="mt-2 hover:bg-paisagem-purple hover:text-white transition-colors"
+                    >
+                      <Link to={`/artist-products/${artist.id}`}>
+                        {t("View Products")} ({artist.products})
+                      </Link>
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -79,9 +93,9 @@ const FeaturedArtists = () => {
         </div>
         
         <div className="flex justify-center mt-10">
-          <a href="/artists" className="text-paisagem-purple hover:text-paisagem-darkPurple font-medium underline underline-offset-4">
-            View All Artists
-          </a>
+          <Link to="/artists" className="text-paisagem-purple hover:text-paisagem-darkPurple font-medium underline underline-offset-4">
+            {t("View All Artists")}
+          </Link>
         </div>
       </div>
     </section>

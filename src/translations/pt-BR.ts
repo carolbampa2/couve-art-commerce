@@ -7,6 +7,7 @@ const translations = {
   "About COUVE": "Sobre COUVE",
   "Connect Wallet": "Conectar Carteira",
   "Connected": "Conectado",
+  "Select Wallet": "Selecionar Carteira",
   
   // Hero
   "Where Art Meets Web3 Technology": "Onde a Arte Encontra a Tecnologia Web3",
@@ -32,6 +33,33 @@ const translations = {
   "Featured": "Destaque",
   "Products": "Produtos",
   "View All Artists": "Ver Todos os Artistas",
+  "View Products": "Ver Produtos",
+  "Our Artists": "Nossos Artistas",
+  "artists_description": "Descubra criadores talentosos dando vida a visões únicas, apoiados pela plataforma Paisagem.",
+  "Search artists by name or style...": "Buscar artistas por nome ou estilo...",
+  "All": "Todos",
+  "Digital": "Digital",
+  "Traditional": "Tradicional",
+  "Mixed Media": "Técnica Mista",
+  "Cultural": "Cultural",
+  "Urban": "Urbano",
+  "Nature": "Natureza",
+  "Cyberpunk": "Cyberpunk",
+  "Neon": "Neon",
+  "Contemporary": "Contemporâneo",
+  "Abstract": "Abstrato",
+  "Illustration": "Ilustração",
+  "Street Art": "Arte de Rua",
+  "Want to join our artist community?": "Quer se juntar à nossa comunidade de artistas?",
+  "artist_join_description": "Estamos sempre procurando artistas talentosos para se juntar à nossa plataforma. Se você estiver interessado em mostrar seu trabalho e alcançar um público mais amplo, entre em contato conosco.",
+  "Contact us to become a Paisagem artist": "Contate-nos para se tornar um artista Paisagem",
+  
+  // Artist Products
+  "Products by": "Produtos de",
+  "View Details": "Ver Detalhes",
+  "COUVE Exclusive": "Exclusivo COUVE",
+  "No products found for this artist.": "Nenhum produto encontrado para este artista.",
+  "Artist not found": "Artista não encontrado",
   
   // Artist Signup Section
   "Are you an artist?": "É um artista?",

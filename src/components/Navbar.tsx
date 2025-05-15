@@ -6,20 +6,29 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Link } from "react-router-dom";
 import LanguageThemeSelector from "@/components/LanguageThemeSelector";
 import { useLanguage } from "@/context/LanguageContext";
+import WalletConnectModal from "@/components/WalletConnectModal";
 
 const Navbar = () => {
   const [connected, setConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const { t } = useLanguage();
 
   const handleConnect = () => {
-    // This would be replaced with actual wallet connection logic
-    setConnected(!connected);
-    
     if (!connected) {
-      console.log("Connecting wallet...");
+      setIsWalletModalOpen(true);
     } else {
+      // Disconnect wallet logic
+      setConnected(false);
+      setWalletAddress(null);
       console.log("Disconnecting wallet...");
     }
+  };
+
+  const handleWalletConnected = (address: string) => {
+    setConnected(true);
+    setWalletAddress(address);
+    console.log("Connected wallet:", address);
   };
 
   const navItems = [
@@ -59,7 +68,9 @@ const Navbar = () => {
             className={`hidden md:flex items-center ${connected ? 'border-green-500 text-green-500' : 'gradient-bg'}`}
           >
             <Wallet className="mr-2 h-4 w-4" />
-            {connected ? t('Connected') : t('Connect Wallet')}
+            {connected ? 
+              (walletAddress ? `${walletAddress.substring(0, 4)}...${walletAddress.substring(walletAddress.length - 4)}` : t('Connected')) : 
+              t('Connect Wallet')}
           </Button>
 
           {/* Mobile menu */}
@@ -91,7 +102,9 @@ const Navbar = () => {
                   className={`mt-4 ${connected ? 'border-green-500 text-green-500' : 'gradient-bg'}`}
                 >
                   <Wallet className="mr-2 h-4 w-4" />
-                  {connected ? t('Connected') : t('Connect Wallet')}
+                  {connected ? 
+                    (walletAddress ? `${walletAddress.substring(0, 4)}...${walletAddress.substring(walletAddress.length - 4)}` : t('Connected')) : 
+                    t('Connect Wallet')}
                 </Button>
                 
                 {/* Language and Theme selector in mobile menu */}
@@ -103,6 +116,13 @@ const Navbar = () => {
           </Sheet>
         </div>
       </div>
+
+      {/* Wallet connect modal */}
+      <WalletConnectModal 
+        open={isWalletModalOpen} 
+        onOpenChange={setIsWalletModalOpen}
+        onConnect={handleWalletConnected}
+      />
     </header>
   );
 };

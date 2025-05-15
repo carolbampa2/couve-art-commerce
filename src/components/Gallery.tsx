@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Gallery = () => {
   const images = [
@@ -11,6 +12,7 @@ const Gallery = () => {
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -21,7 +23,7 @@ const Gallery = () => {
   }, [images.length]);
 
   return (
-    <div className="relative bg-gray-900 rounded-lg overflow-hidden shadow-xl animate-float">
+    <div className="relative bg-gray-900 rounded-lg overflow-hidden shadow-xl animate-float w-full max-w-full mx-auto sm:mx-0">
       <div className="aspect-[16/9] bg-gradient-to-br from-paisagem-darkPurple to-paisagem-teal p-2">
         <AspectRatio ratio={16/9}>
           <div className="w-full h-full bg-background/5 rounded-md flex items-center justify-center overflow-hidden">
