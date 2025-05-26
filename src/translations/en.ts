@@ -1,4 +1,3 @@
-
 const translations = {
   // Navbar
   "Home": "Home",
@@ -86,7 +85,30 @@ const translations = {
 
   // Form
   "Email": "Email",
-  "Submit": "Submit"
+  "Submit": "Submit",
+  
+  // Authentication
+  "Entrar": "Sign In",
+  "Cadastrar": "Sign Up",
+  "Sair": "Sign Out",
+  "Bem-vindo": "Welcome",
+  "Entre na sua conta ou crie uma nova": "Sign in to your account or create a new one",
+  "Acesse sua conta ou cadastre-se": "Access your account or sign up",
+  "Nome Completo": "Full Name",
+  "Senha": "Password",
+  "Entrando...": "Signing in...",
+  "Cadastrando...": "Signing up...",
+  "Ou continue com": "Or continue with",
+  "Perfil": "Profile",
+  "Tornar-se Artista": "Become an Artist",
+  "Erro no cadastro": "Sign up error",
+  "Erro no login": "Sign in error",
+  "Erro ao sair": "Sign out error",
+  "Cadastro realizado!": "Sign up successful!",
+  "Login realizado!": "Sign in successful!",
+  "Verifique seu email para confirmar a conta.": "Check your email to confirm your account.",
+  "Bem-vindo de volta!": "Welcome back!",
+  "Erro no login social": "Social login error",
 };
 
 export default translations;

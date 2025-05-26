@@ -1,34 +1,47 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Menu, Wallet } from "lucide-react";
+import { Menu, Wallet, User, LogOut } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import LanguageThemeSelector from "@/components/LanguageThemeSelector";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 import WalletConnectModal from "@/components/WalletConnectModal";
 
 const Navbar = () => {
-  const [connected, setConnected] = useState(false);
+  const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const { t } = useLanguage();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
-  const handleConnect = () => {
-    if (!connected) {
+  const handleWalletConnect = () => {
+    if (!walletConnected) {
       setIsWalletModalOpen(true);
     } else {
-      // Disconnect wallet logic
-      setConnected(false);
+      setWalletConnected(false);
       setWalletAddress(null);
       console.log("Disconnecting wallet...");
     }
   };
 
   const handleWalletConnected = (address: string) => {
-    setConnected(true);
+    setWalletConnected(true);
     setWalletAddress(address);
     console.log("Connected wallet:", address);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   const navItems = [
@@ -59,19 +72,67 @@ const Navbar = () => {
         </nav>
 
         <div className="flex items-center space-x-4">
-          {/* Language and Theme Selector */}
           <LanguageThemeSelector />
 
+          {/* Wallet Connect Button */}
           <Button 
-            onClick={handleConnect} 
-            variant={connected ? "outline" : "default"}
-            className={`hidden md:flex items-center ${connected ? 'border-green-500 text-green-500' : 'gradient-bg'}`}
+            onClick={handleWalletConnect} 
+            variant={walletConnected ? "outline" : "default"}
+            className={`hidden md:flex items-center ${walletConnected ? 'border-green-500 text-green-500' : 'gradient-bg'}`}
           >
             <Wallet className="mr-2 h-4 w-4" />
-            {connected ? 
+            {walletConnected ? 
               (walletAddress ? `${walletAddress.substring(0, 4)}...${walletAddress.substring(walletAddress.length - 4)}` : t('Connected')) : 
               t('Connect Wallet')}
           </Button>
+
+          {/* User Menu */}
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.full_name} />
+                    <AvatarFallback>
+                      {user.user_metadata?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <div className="flex items-center justify-start gap-2 p-2">
+                  <div className="flex flex-col space-y-1 leading-none">
+                    <p className="font-medium">{user.user_metadata?.full_name || 'Usuário'}</p>
+                    <p className="w-[200px] truncate text-sm text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="flex items-center">
+                    <User className="mr-2 h-4 w-4" />
+                    {t("Perfil")}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/artist-signup" className="flex items-center">
+                    <User className="mr-2 h-4 w-4" />
+                    {t("Tornar-se Artista")}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  {t("Sair")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button asChild className="hidden md:flex gradient-bg">
+              <Link to="/auth">{t("Entrar")}</Link>
+            </Button>
+          )}
 
           {/* Mobile menu */}
           <Sheet>
@@ -97,17 +158,38 @@ const Navbar = () => {
                 ))}
 
                 <Button 
-                  onClick={handleConnect} 
-                  variant={connected ? "outline" : "default"}
-                  className={`mt-4 ${connected ? 'border-green-500 text-green-500' : 'gradient-bg'}`}
+                  onClick={handleWalletConnect} 
+                  variant={walletConnected ? "outline" : "default"}
+                  className={`mt-4 ${walletConnected ? 'border-green-500 text-green-500' : 'gradient-bg'}`}
                 >
                   <Wallet className="mr-2 h-4 w-4" />
-                  {connected ? 
+                  {walletConnected ? 
                     (walletAddress ? `${walletAddress.substring(0, 4)}...${walletAddress.substring(walletAddress.length - 4)}` : t('Connected')) : 
                     t('Connect Wallet')}
                 </Button>
+
+                {user ? (
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.user_metadata?.avatar_url} />
+                        <AvatarFallback>
+                          {user.user_metadata?.full_name?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium">{user.user_metadata?.full_name || 'Usuário'}</span>
+                    </div>
+                    <Button variant="outline" onClick={handleSignOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      {t("Sair")}
+                    </Button>
+                  </div>
+                ) : (
+                  <Button asChild className="gradient-bg">
+                    <Link to="/auth">{t("Entrar")}</Link>
+                  </Button>
+                )}
                 
-                {/* Language and Theme selector in mobile menu */}
                 <div className="mt-4 flex items-center justify-center">
                   <LanguageThemeSelector />
                 </div>
@@ -117,7 +199,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Wallet connect modal */}
       <WalletConnectModal 
         open={isWalletModalOpen} 
         onOpenChange={setIsWalletModalOpen}
