@@ -13,6 +13,7 @@ import Token from "./pages/Token";
 import TokenConfirmation from "./pages/TokenConfirmation";
 import Checkout from "./pages/Checkout";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import Admin from "./pages/Admin";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Auth from "./pages/Auth";

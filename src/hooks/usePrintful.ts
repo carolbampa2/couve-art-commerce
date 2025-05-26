@@ -1,7 +1,13 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { Tables } from '../integrations/supabase/types';
 import { useToast } from '@/hooks/use-toast';
+
+// Define the PrintfulProduct interface
+interface PrintfulProduct extends Tables<'products'> {
+  artists: Tables<'artists'> | null;
+}
 
 export const useSyncPrintfulProducts = () => {
   const queryClient = useQueryClient();
@@ -64,9 +70,9 @@ export const useCreatePrintfulOrder = () => {
 };
 
 export const usePrintfulProducts = () => {
-  return useQuery({
+  return useQuery<PrintfulProduct[], Error>({
     queryKey: ['products', 'printful'],
-    queryFn: async () => {
+    queryFn: async (): Promise<PrintfulProduct[]> => {
       const { data, error } = await supabase
         .from('products')
         .select(`
@@ -82,7 +88,11 @@ export const usePrintfulProducts = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      // Supabase typings might not perfectly match our extended interface,
+      // so we cast to PrintfulProduct[] ensuring the structure is compatible.
+      // If data is null (e.g. no products found), return an empty array
+      // to match the expected PrintfulProduct[] return type.
+      return (data as PrintfulProduct[] | null) ?? [];
     },
   });
 };
