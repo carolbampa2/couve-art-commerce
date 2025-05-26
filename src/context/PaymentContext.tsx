@@ -49,6 +49,38 @@ export const PaymentProvider = ({ children }: PaymentProviderProps) => {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 2000));
       
+      // After successful payment, trigger Printful order creation
+      const orderData = {
+        // You would get this from your order context/state
+        orderId: 'temp-order-id',
+        customerInfo: {
+          email: cardData.email || 'customer@example.com'
+        },
+        shippingInfo: {
+          firstName: cardData.firstName || 'John',
+          lastName: cardData.lastName || 'Doe',
+          address: cardData.address || '123 Main St',
+          city: cardData.city || 'City',
+          zip: cardData.zip || '12345',
+          country: cardData.country || 'US'
+        }
+      };
+      
+      // Call Printful order creation
+      try {
+        const { data: printfulData, error: printfulError } = await supabase.functions.invoke('create-printful-order', {
+          body: orderData
+        });
+        
+        if (printfulError) {
+          console.error('Printful order creation error:', printfulError);
+        } else {
+          console.log('Printful order created:', printfulData);
+        }
+      } catch (printfulErr) {
+        console.error('Error calling Printful function:', printfulErr);
+      }
+      
       // Success notification
       toast({
         title: "Payment Successful",

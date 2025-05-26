@@ -43,6 +43,7 @@ const App = () => (
                 <Route path="/token-confirmation/:productId" element={<TokenConfirmation />} />
                 <Route path="/checkout/:productId" element={<Checkout />} />
                 <Route path="/payment-success" element={<PaymentSuccess />} />
+                <Route path="/admin" element={<Admin />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="*" element={<NotFound />} />
