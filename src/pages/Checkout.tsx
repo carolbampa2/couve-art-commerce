@@ -9,10 +9,16 @@ import OrderSummary from '@/components/checkout/OrderSummary';
 import PaymentSection from '@/components/checkout/PaymentSection';
 import CheckoutSummary from '@/components/checkout/CheckoutSummary';
 import { PaymentProvider } from '@/context/PaymentContext';
+import { CrossmintProvider, CrossmintHostedCheckout } from '@crossmint/client-sdk-react-ui';
+
+// Define the Staging Client API Key
+const STAGING_CLIENT_API_KEY = "ck_staging_5TNx5swqCST7UE5jdjKze6SpyJAgdjjWPGXjpcEx8qayExyZzf21vuY7ZERbeHbArxm8fUn8yhedtTDn18zrJaGw8vmqN72t86tkWLm9fknnar21yuv4HtaNqT5eshgBxZhd1crdCrucPrHX98isJvzepwdQ5PQ2FrQMw4Kj6VH6gQDe77E5SJvWKr6DX6fr1QwMWDdtgLPSuRVtbadsZc3S";
+const STAGING_COLLECTION_ID = "6387aa45-f0bf-4923-a63c-2e13783a58dc";
+
 
 const Checkout = () => {
   const { productId } = useParams();
-  
+
   // Initialize react-hook-form
   const form = useForm({
     defaultValues: {
@@ -46,31 +52,58 @@ const Checkout = () => {
     quantity: 1
   };
 
+  const lineItems = [
+    {
+      collectionLocator: `crossmint:${STAGING_COLLECTION_ID}`,
+      callData: {
+        totalPrice: String(product.price * product.quantity), // Assuming product.price is in a unit that doesn't need further conversion to smallest unit for now
+        quantity: product.quantity,
+        productId: product.id,
+        customData: product.size || ""
+      }
+    }
+  ];
+
+  const paymentConfig = {
+    crypto: { enabled: true },
+    fiat: { enabled: true }
+  };
+
   return (
     <PaymentProvider>
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 py-12">
-          <div className="container px-4 md:px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Left column - Order summary */}
-              <div className="lg:col-span-2">
-                <div className="mb-8">
-                  <h1 className="text-3xl font-bold tracking-tight mb-2">Checkout</h1>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <span>Cart</span>
-                    <ChevronRight className="h-4 w-4 mx-1" />
-                    <span>Information</span>
-                    <ChevronRight className="h-4 w-4 mx-1" />
-                    <span className="font-medium text-foreground">Payment</span>
+      <CrossmintProvider apiKey={STAGING_CLIENT_API_KEY}>
+        <div className="min-h-screen flex flex-col">
+          <Navbar />
+          <main className="flex-1 py-12">
+            <div className="container px-4 md:px-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left column - Order summary */}
+                <div className="lg:col-span-2">
+                  <div className="mb-8">
+                    <h1 className="text-3xl font-bold tracking-tight mb-2">Checkout</h1>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <span>Cart</span>
+                      <ChevronRight className="h-4 w-4 mx-1" />
+                      <span>Information</span>
+                      <ChevronRight className="h-4 w-4 mx-1" />
+                      <span className="font-medium text-foreground">Payment</span>
+                    </div>
                   </div>
-                </div>
 
-                <OrderSummary product={product} />
-                <PaymentSection form={form} />
-              </div>
-              
-              {/* Right column - Payment and shipping info */}
+                  <OrderSummary product={product} />
+                  
+                  {/* Crossmint Hosted Checkout */}
+                  <div className="my-8"> {/* Added some margin for spacing */}
+                    <CrossmintHostedCheckout
+                      lineItems={lineItems}
+                      payment={paymentConfig}
+                    />
+                  </div>
+                  
+                  <PaymentSection form={form} />
+                </div>
+                
+                {/* Right column - Payment and shipping info */}
               <div>
                 <CheckoutSummary 
                   total={product.price * product.quantity + 5.99}
@@ -81,7 +114,8 @@ const Checkout = () => {
           </div>
         </main>
         <Footer />
-      </div>
+        </div>
+      </CrossmintProvider>
     </PaymentProvider>
   );
 };
