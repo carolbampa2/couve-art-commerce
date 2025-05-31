@@ -1,163 +1,232 @@
 // supabase/functions/crossmint-webhook-handler/index.ts
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { Webhook } from "https://esm.sh/svix@1.20.0";
 
-console.log("Crossmint Webhook Handler function initializing (v3.2 - mock shipping)...");
+console.log("Crossmint Webhook Handler function initializing (v3.5 - Printful API call)...");
 
-// Centralized function to prepare data for Printful
-function prepareAndLogPrintfulOrder(
-  orderId: string,
-  productId: string | null, 
-  quantity: number | null, 
-  customData: string | undefined | null, 
-  // Shipping address and email will be mocked if mockShipping is true
-  shippingAddressFromWebhook: any, // Actual shipping address from webhook (if available)
-  recipientEmailFromWebhook: string | null, // Actual email from webhook
-  mockShipping: boolean = false // Default to false, but we'll set it to true from handler
+// Centralized function to prepare data for Printful and make API call
+async function prepareAndLogPrintfulOrder(
+  orderId: string, // This is the crossmint_order_id
+  productId: string | null,
+  quantity: number | null,
+  customData: string | undefined | null,
+  shippingAddressFromDb: any,
+  recipientEmailFromDb: string | null,
+  mockShippingFallback: boolean = false, // Should be false when called with DB data
+  supabaseAdmin: SupabaseClient // Added Supabase client for DB updates
 ) {
-  console.log(`Preparing Printful order for Crossmint Order ID: ${orderId}`);
+  console.log(`Attempting to create Printful order for Crossmint Order ID: ${orderId}`);
 
   const printfulApiKey = Deno.env.get("PRINTFUL_API_KEY");
   if (!printfulApiKey) {
-    console.error("PRINTFUL_API_KEY is not set. Cannot prepare Printful order.");
+    console.error(`PRINTFUL_API_KEY is not set. Cannot create Printful order for ${orderId}.`);
+    await supabaseAdmin.from('orders').update({ status: 'printful_submission_failed', updated_at: new Date().toISOString(), printful_response: { error: "PRINTFUL_API_KEY not set on server" } }).eq('crossmint_order_id', orderId);
     return;
   }
-  // console.log("Printful API Key found (presence check only).");
 
   if (!productId || quantity === null || quantity === undefined || quantity <= 0) {
     console.error(`Critical product information (productId: ${productId}, quantity: ${quantity}) is missing or invalid for Printful order ${orderId}.`);
+    await supabaseAdmin.from('orders').update({ status: 'printful_submission_failed', updated_at: new Date().toISOString(), printful_response: { error: "Missing product info for Printful" } }).eq('crossmint_order_id', orderId);
     return;
   }
-  
+
   let printfulRecipient: any;
 
-  if (mockShipping) {
-    console.warn("Using MOCKED shipping data for this Printful order preparation as primaryShippingAddress was not found in webhook.");
+  if (mockShippingFallback) {
+    console.warn(`Using MOCKED shipping data for Printful order ${orderId} as a fallback.`);
     printfulRecipient = {
-      name: "Mock Customer",
-      address1: "123 Mock Street",
-      city: "Mockville",
-      state_code: "MC",
-      country_code: "US",
-      zip: "90210",
-      email: recipientEmailFromWebhook || "mock-customer@example.com", // Use webhook email if available
+      name: "Mock Customer (Fallback)", address1: "123 Mock Fallback St", city: "Mockville",
+      state_code: "MC", country_code: "US", zip: "90210",
+      email: recipientEmailFromDb || "mock-customer-fallback@example.com",
     };
-  } else if (shippingAddressFromWebhook && recipientEmailFromWebhook) {
-    console.log("Using LIVE shipping data from webhook for Printful order preparation.");
+  } else if (shippingAddressFromDb && recipientEmailFromDb) {
     printfulRecipient = {
-      name: shippingAddressFromWebhook?.name,
-      address1: shippingAddressFromWebhook?.street1 || shippingAddressFromWebhook?.street,
-      city: shippingAddressFromWebhook?.city,
-      state_code: shippingAddressFromWebhook?.state_code || shippingAddressFromWebhook?.state,
-      country_code: shippingAddressFromWebhook?.country_code || shippingAddressFromWebhook?.country,
-      zip: shippingAddressFromWebhook?.postal_code || shippingAddressFromWebhook?.zip,
-      email: recipientEmailFromWebhook,
+      name: shippingAddressFromDb?.name || `${shippingAddressFromDb?.firstName || ''} ${shippingAddressFromDb?.lastName || ''}`.trim(),
+      address1: shippingAddressFromDb?.address1 || shippingAddressFromDb?.address,
+      address2: shippingAddressFromDb?.address2 || undefined,
+      city: shippingAddressFromDb?.city,
+      state_code: shippingAddressFromDb?.state_code || shippingAddressFromDb?.state,
+      country_code: shippingAddressFromDb?.country_code || shippingAddressFromDb?.country,
+      zip: shippingAddressFromDb?.postal_code || shippingAddressFromDb?.zip,
+      email: recipientEmailFromDb,
     };
-    // Basic validation for live recipient data
+
     if (!printfulRecipient.name || !printfulRecipient.address1 || !printfulRecipient.city || !printfulRecipient.country_code || !printfulRecipient.zip) {
-      console.error(`Critical LIVE shipping information missing or incomplete for Printful order ${orderId}. Received:`, JSON.stringify(shippingAddressFromWebhook));
-      console.error("Constructed Printful recipient for logging:", JSON.stringify(printfulRecipient));
-      console.warn("Falling back to MOCKED shipping data due to incomplete live data.");
-      // Fallback to mocked data if live data is incomplete
-      printfulRecipient.name = printfulRecipient.name || "Mock Customer Fallback";
-      printfulRecipient.address1 = printfulRecipient.address1 || "123 Mock Street";
-      printfulRecipient.city = printfulRecipient.city || "Mockville";
-      printfulRecipient.state_code = printfulRecipient.state_code || "MC";
-      printfulRecipient.country_code = printfulRecipient.country_code || "US";
-      printfulRecipient.zip = printfulRecipient.zip || "90210";
-      printfulRecipient.email = printfulRecipient.email || "mock-fallback@example.com";
+      console.error(`Critical LIVE shipping information from DB is missing or incomplete for Printful order ${orderId}. Received:`, JSON.stringify(shippingAddressFromDb));
+      await supabaseAdmin.from('orders').update({ status: 'printful_submission_failed', updated_at: new Date().toISOString(), printful_response: { error: "Incomplete shipping data from DB" } }).eq('crossmint_order_id', orderId);
+      return;
     }
   } else {
-     console.error(`Shipping data from webhook is missing and mocking is not enabled for order ${orderId}. Cannot prepare Printful recipient.`);
+     console.error(`Shipping data from DB is missing for order ${orderId}, and fallback not triggered. Cannot prepare Printful recipient.`);
+     await supabaseAdmin.from('orders').update({ status: 'printful_submission_failed', updated_at: new Date().toISOString(), printful_response: { error: "Missing shipping data from DB, no fallback" } }).eq('crossmint_order_id', orderId);
      return;
   }
 
-
   const printfulItems = [{
-    external_variant_id: productId, 
-    quantity: quantity,
-    name: `Product: ${productId} ${customData ? `(${customData})` : ''}` 
+    external_variant_id: productId,
+    quantity: Number(quantity), // Ensure quantity is number
+    name: `Product: ${productId} ${customData ? `(${customData})` : ''}` // Optional: name for display on packing slip
   }];
 
-  console.log("Prepared Printful Recipient:", JSON.stringify(printfulRecipient));
-  console.log("Prepared Printful Items:", JSON.stringify(printfulItems));
-  console.log("Mock Printful Order: Would attempt to send this data to Printful API for order:", orderId);
+  const printfulOrderPayload = {
+    external_id: orderId, // Using crossmint_order_id as Printful's external_id
+    recipient: printfulRecipient,
+    items: printfulItems,
+    confirm: true, // Auto-confirms the order for fulfillment
+    // packing_slip: { // Optional: customize packing slip
+    //   email: recipientEmailFromDb,
+    //   message: `Thank you for your order! Crossmint Order ID: ${orderId}`
+    // }
+  };
+
+  console.log(`Sending order to Printful API for Crossmint Order ID ${orderId}. Payload:`, JSON.stringify(printfulOrderPayload, null, 2));
+
+  try {
+    const printfulResponse = await fetch("https://api.printful.com/orders", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${printfulApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(printfulOrderPayload),
+    });
+
+    const printfulResultText = await printfulResponse.text();
+    const printfulResultJson = JSON.parse(printfulResultText); // Try to parse JSON regardless of status for logging
+
+    if (!printfulResponse.ok) {
+      console.error(`Printful API Error (${printfulResponse.status}) for Crossmint Order ID ${orderId}:`, printfulResultText);
+      await supabaseAdmin.from('orders').update({
+        status: 'printful_submission_failed',
+        printful_response: printfulResultJson, // Store error response
+        updated_at: new Date().toISOString()
+      }).eq('crossmint_order_id', orderId);
+      return;
+    }
+
+    const printfulOrder = printfulResultJson.result;
+    console.log(`Printful API Success for Crossmint Order ID ${orderId}. Printful Order ID: ${printfulOrder.id}, Status: ${printfulOrder.status}`);
+
+    await supabaseAdmin.from('orders').update({
+      status: 'printful_order_created', // Or map Printful status if needed
+      printful_order_id: String(printfulOrder.id),
+      printful_response: printfulOrder, // Store success response
+      updated_at: new Date().toISOString()
+    }).eq('crossmint_order_id', orderId);
+
+  } catch (apiError) {
+    console.error(`Error during Printful API call for Crossmint Order ID ${orderId}:`, apiError.message, apiError.stack);
+    await supabaseAdmin.from('orders').update({
+      status: 'printful_submission_failed',
+      printful_response: { error: apiError.message, stack: apiError.stack },
+      updated_at: new Date().toISOString()
+    }).eq('crossmint_order_id', orderId);
+  }
 }
 
-// Main event handling logic
-function handleVerifiedWebhook(verifiedPayload: any) {
+// Enhanced event handling logic with DB lookup
+async function handleVerifiedWebhook(verifiedPayload: any, supabaseAdmin: SupabaseClient) {
   const eventType = verifiedPayload.type;
-  const eventData = verifiedPayload.data; 
+  const eventData = verifiedPayload.data;
+  const crossmintOrderId = eventData?.orderId;
 
-  if (!eventData) {
-    console.error(`eventData (verifiedPayload.data) is undefined for event type ${eventType}. Full verified payload:`, JSON.stringify(verifiedPayload, null, 2));
+  if (!eventData || !crossmintOrderId) {
+    console.error(`eventData or crossmintOrderId is undefined. Type: ${eventType}. Full payload:`, JSON.stringify(verifiedPayload, null, 2));
     return;
   }
 
-  const orderId = eventData.orderId;
-  console.log(`Processing event type: ${eventType}. Order ID: ${orderId}.`);
-  // Log the full eventData for the current event for detailed inspection
-  console.log("Full eventData (verifiedPayload.data) for this event:", JSON.stringify(eventData, null, 2));
+  console.log(`Processing event type: ${eventType}. Crossmint Order ID: ${crossmintOrderId}.`);
 
-  let callDataProductId = null;
-  let callDataQuantity = null;
-  let callDataCustomData = null;
-  
-  // Try to get shipping address and email from standard locations in the payload
-  // These might be present in payment.succeeded or potentially other events.
-  const shippingAddress = eventData.shippingAddress; // Root level, as per some Crossmint examples
-  const buyerEmail = eventData.buyerIdentity?.email || // From buyerIdentity object
-                     eventData.payment?.receiptEmail ||    // From payment object
-                     eventData.delivery?.recipient?.email; // From delivery recipient object
+  const { data: orderFromDb, error: dbFetchError } = await supabaseAdmin
+    .from('orders')
+    .select('*')
+    .eq('crossmint_order_id', crossmintOrderId)
+    .single();
 
-  if (eventData.lineItems && eventData.lineItems.length > 0) {
-    const callData = eventData.lineItems[0]?.callData;
-    if (callData) {
-      callDataProductId = callData.productId;
-      callDataQuantity = callData.quantity; 
-      callDataCustomData = callData.customData;
-      console.log(`Extracted from lineItems[0].callData: productId=${callDataProductId}, quantity=${callDataQuantity}, customData=${callDataCustomData}, contractTotalPrice=${callData.totalPrice}, buyerInCallData=${callData.buyer}`);
-    } else {
-      console.warn(`callData object not found in lineItems[0] for order ${orderId}`);
-    }
-  } else {
-    console.warn(`lineItems array not found or empty for order ${orderId}`);
+  if (dbFetchError || !orderFromDb) {
+    console.error(`Error fetching order from DB for crossmint_order_id ${crossmintOrderId}:`, dbFetchError?.message || "Order not found.");
+    return;
   }
-  
-  if (eventType === "orders.payment.succeeded") {
-    console.log(`Captured for orders.payment.succeeded (Order ID: ${orderId}): shippingAddress directly from eventData:`, JSON.stringify(shippingAddress), `buyerEmail: ${buyerEmail}`);
-    
-    if (callDataProductId && callDataQuantity !== null && callDataQuantity > 0) {
-      // If shippingAddress is NOT found in the webhook, mockShipping will be true by default in the next call.
-      // If it IS found, mockShipping will be false.
-      prepareAndLogPrintfulOrder(orderId, callDataProductId, callDataQuantity, callDataCustomData, shippingAddress, buyerEmail, !shippingAddress);
+  console.log("Fetched order from DB:", JSON.stringify(orderFromDb, null, 2));
+
+  const {
+    recipient_email, shipping_address, product_id,
+    quantity, custom_data, status: currentDbStatus
+  } = orderFromDb;
+
+  let newStatus = currentDbStatus;
+  if (eventType === "orders.payment.succeeded" && currentDbStatus === "pending_payment") {
+    newStatus = "payment_succeeded";
+  } else if (eventType === "orders.delivery.completed" &&
+             (currentDbStatus === "pending_payment" || currentDbStatus === "payment_succeeded")) {
+    newStatus = "delivery_completed";
+  }
+
+
+  if (newStatus !== currentDbStatus) {
+    const { error: dbUpdateError } = await supabaseAdmin
+      .from('orders')
+      .update({ status: newStatus, updated_at: new Date().toISOString() })
+      .eq('crossmint_order_id', crossmintOrderId);
+
+    if (dbUpdateError) {
+      console.error(`Error updating order status for ${crossmintOrderId} to ${newStatus}:`, dbUpdateError.message);
     } else {
-      console.warn(`Missing critical callData (productId or quantity) in orders.payment.succeeded for order ${orderId}. Cannot prepare Printful order.`);
+      console.log(`Order ${crossmintOrderId} status updated in DB to ${newStatus}.`);
     }
-  } else if (eventType === "orders.delivery.completed") {
-    console.log(`Order Delivery Completed for ${orderId}. TxID: ${eventData.delivery?.txId}. Recipient Email from delivery: ${eventData.delivery?.recipient?.email}`);
-    // We generally expect shipping address to come from payment.succeeded.
-    // If we were to trigger Printful from here, we'd need a strategy to get that shipping address.
-    // For now, the primary Printful prep call is in payment.succeeded.
-    if (!shippingAddress) { // If shippingAddress was not in the delivery.completed eventData root
-        console.warn(`Shipping address was not found at the root of eventData for orders.delivery.completed. Printful order for ${orderId} should have been prepared by payment.succeeded if shipping was available there.`);
+  }
+
+  if (eventType === "orders.delivery.completed") {
+    console.log(`Order ${crossmintOrderId} delivery completed. Attempting to create Printful order with data from DB.`);
+    if (shipping_address && recipient_email && product_id && quantity !== null && quantity > 0) {
+      await prepareAndLogPrintfulOrder( // Ensure to await this async function
+        crossmintOrderId,
+        product_id,
+        Number(quantity),
+        custom_data,
+        shipping_address,
+        recipient_email,
+        false, // mockShippingFallback = false
+        supabaseAdmin // Pass Supabase client
+      );
+    } else {
+      console.warn(`Data from DB for order ${crossmintOrderId} is insufficient for Printful. Missing: shipping_address, recipient_email, product_id, or valid quantity.`);
     }
+  } else if (eventType === "orders.payment.succeeded") {
+      console.log(`Payment succeeded for ${crossmintOrderId}. Data ready in DB. 'orders.delivery.completed' event will trigger Printful creation.`);
   } else {
-    console.log(`Received and verified (but not specifically handled for Printful prep) event type: ${eventType}`);
+    console.log(`Event type ${eventType} for order ${crossmintOrderId} does not trigger Printful creation at this stage.`);
   }
 }
 
 // --- Main Server ---
 serve(async (req: Request) => {
-  if (req.method !== "POST") {
+  if (req.method !== "POST" && req.method !== "OPTIONS") {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
-  const signingSecret = Deno.env.get("CROSSMINT_WEBHOOK_SIGNING_SECRET");
-  if (!signingSecret) {
-    console.error("CROSSMINT_WEBHOOK_SIGNING_SECRET is not configured. Cannot verify webhook.");
-    return new Response("Webhook signing secret not configured on server.", { status: 500 });
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, Svix-Id, Svix-Timestamp, Svix-Signature",
+      },
+    });
   }
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const signingSecret = Deno.env.get("CROSSMINT_WEBHOOK_SIGNING_SECRET");
+
+  if (!supabaseUrl || !supabaseServiceRoleKey || !signingSecret) {
+    console.error("Missing required environment variables (Supabase URL, Service Role Key, or Svix Signing Secret).");
+    return new Response("Server configuration error.", { status: 500, headers: { "Access-Control-Allow-Origin": "*" } });
+  }
+
+  const supabaseAdmin: SupabaseClient = createClient(supabaseUrl, supabaseServiceRoleKey);
 
   const svix_id = req.headers.get("svix-id");
   const svix_timestamp = req.headers.get("svix-timestamp");
@@ -165,7 +234,7 @@ serve(async (req: Request) => {
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
     console.error("Missing Svix headers for verification.");
-    return new Response("Missing Svix headers", { status: 400 });
+    return new Response("Missing Svix headers", { status: 400, headers: { "Access-Control-Allow-Origin": "*" } });
   }
 
   const headersForSvix = {
@@ -178,19 +247,20 @@ serve(async (req: Request) => {
 
   try {
     const wh = new Webhook(signingSecret);
-    const verifiedPayload = wh.verify(rawBody, headersForSvix); 
+    const verifiedPayload = wh.verify(rawBody, headersForSvix);
 
     console.log("Successfully verified webhook payload. Type:", verifiedPayload.type);
-    handleVerifiedWebhook(verifiedPayload); 
+    await handleVerifiedWebhook(verifiedPayload, supabaseAdmin);
 
-    return new Response("Webhook processed successfully", { status: 200 });
+    return new Response("Webhook processed successfully", { status: 200, headers: { "Access-Control-Allow-Origin": "*" } });
 
   } catch (err) {
     console.error("Webhook verification failed or error during processing:", err.message);
-    if (rawBody && err.message.includes("signature")) { 
+    if (rawBody && err.message.includes("signature")) {
         console.error("Raw body for failed signature verification:", rawBody);
     }
-    return new Response(\`Webhook error: ${err.message}\`, { status: 400 });
+    return new Response(`Webhook error: ${err.message}`, { status: 400, headers: { "Access-Control-Allow-Origin": "*" } });
   }
 });
-console.log("Crossmint Webhook Handler function script loaded (v3.2 - mock shipping).");
+
+console.log("Crossmint Webhook Handler function script loaded (v3.5 - Printful API call).");
