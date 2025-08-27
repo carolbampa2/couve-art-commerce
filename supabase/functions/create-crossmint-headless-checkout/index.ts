@@ -3,24 +3,29 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'; // Import SupabaseClient type
 import { v4 as uuidv4 } from "https://deno.land/std@0.168.0/uuid/mod.ts";
 
-console.log("Function create-crossmint-headless-checkout initializing (v1)...");
+console.log("Function create-crossmint-headless-checkout initializing (v2)...");
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 
 const crossmintCollectionId = "f8fcd198-35a2-4f6f-9b48-78538b5c8446"; // Staging Collection ID
 
 serve(async (req: Request) => {
-  if (req.method !== "POST") {
-    return new Response("Method Not Allowed", { status: 405, headers: { "Content-Type": "application/json" } });
-  }
-
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
-      headers: {
-        "Access-Control-Allow-Origin": "*", // Adjust as needed for security
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-API-KEY", // Add any other headers your client might send
-      },
+      headers: corsHeaders,
+    });
+  }
+
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method Not Allowed" }), { 
+      status: 405, 
+      headers: { ...corsHeaders, "Content-Type": "application/json" } 
     });
   }
 
@@ -33,7 +38,7 @@ serve(async (req: Request) => {
     console.error("Missing environment variables: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, or CROSSMINT_SERVER_API_KEY_STAGING");
     return new Response(JSON.stringify({ error: "Server configuration error." }), {
       status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
@@ -55,7 +60,7 @@ serve(async (req: Request) => {
         !shippingAddress.city || !shippingAddress.zip || !shippingAddress.country) {
       return new Response(JSON.stringify({ error: "Missing required fields in request body." }), {
         status: 400,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -153,7 +158,7 @@ serve(async (req: Request) => {
       }),
       {
         status: 200,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
 
@@ -161,7 +166,7 @@ serve(async (req: Request) => {
     console.error("Error in create-crossmint-headless-checkout:", error.message, error.stack);
     return new Response(JSON.stringify({ error: error.message || "Internal Server Error" }), {
       status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
