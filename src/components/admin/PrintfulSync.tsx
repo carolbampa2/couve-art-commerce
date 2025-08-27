@@ -95,7 +95,7 @@ const PrintfulSync = () => {
                     <div>
                       <h4 className="font-medium">{product.title}</h4>
                       <p className="text-sm text-muted-foreground">
-                        Por {product.artists?.name || 'Artista'}
+                        Produto Printful
                       </p>
                     </div>
                   </div>
